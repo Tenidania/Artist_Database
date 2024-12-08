@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block content %}
+   <h1>Longest Song by Each Artist</h1>
+    <ul>
+        {% for song in songs %}
+            <h2><li>{{song.0}} - {{song.1}} - {{song.2}} </li></h2>
+        {% endfor %}
+
+    </ul> 
+
+{% endblock %}

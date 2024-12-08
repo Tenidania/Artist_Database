@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Longest Songs Played at Each Concert</h1>
+    <ul>
+        {% for concert,song in concert_songs %}
+            <h3>
+                <li>{{concert}}</li>
+                <ul>
+                    <li>{{song.0}} perfomed by {{song.2}} at {{song.1}} minutes</li>
+                </ul>
+            </h3>
+        {% endfor %}
+    </ul>
+{% endblock %}

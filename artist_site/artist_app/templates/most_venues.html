@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Country with the Most Venues - {{country.0}} with {{country.1}} Venues</h1>
+    
+    <h2>Venues (Ordered by Capacity)</h2>
+    <ol>
+        {% for venue in venues %}
+        <h3>
+            <li>{{venue.0.0}} - {{venue.0.2}}. Capacity: {{venue.0.1}}</li>
+            <ul>
+                {% for artist in venue.1 %}
+                    <li>{{artist.0}}</li>
+                {% endfor %}
+            </ul>
+        </h3>
+        {% endfor %}
+    </ol>
+
+
+{% endblock %}
