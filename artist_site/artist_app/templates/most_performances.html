@@ -5,7 +5,12 @@
     <h2>{{artist.1}} with {{artist.2}} songs played</h2>
     
     <ul>
-        {% for a in b %}
+        {% for song in original %}
+            {% if song.0.2 > 1 %}
+                <h3><li>{{song.0.1}} by {{song.1.0}} {{song.0.2}} times </li></h3>
+            {% else %}
+                <h3><li>{{song.0.1}} by {{song.1.0}} {{song.0.2}} time </li></h3>
+            {% endif %}
         {% endfor %}
     </ul>
 {% endblock %}

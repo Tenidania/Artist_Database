@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Most Performing Artist by Country</h1>
+
+    {% for country in countries%}
+        <h2>{{country.0.0}}</h2>
+        <ol>
+            {% for artist in country.1 %}
+                <li>{{artist.0}}: Performed {{artist.2}} times</li>
+            {% endfor %}
+        </ol>
+    {% endfor %}
+{% endblock %}

@@ -16,6 +16,14 @@ cursor = connection.cursor()
 def to_mins(x):
     return f"{x//60}:{x%60:02}"
 
+def find_max(l):
+    max = 0
+    for item in l:
+        if item[2] > max:
+            max = item[2]
+    return [item for item in l if item[2] == max]
+
+
 
 
 
@@ -24,8 +32,7 @@ def to_mins(x):
 def home(request):
     return render(request, 'home.html', {})
 
-
-def show_songs(request):
+def show_songs_by_artist(request):
     query='''
         SELECT s.SongName, s.SongLength, a.ArtistName
         FROM artist_app_artistsong AS asg
@@ -33,27 +40,11 @@ def show_songs(request):
         JOIN artist_app_artist AS a ON asg.ArtistID = a.ArtistID;
     '''
     cursor.execute(query)
-    rows = cursor.fetchall()
-    print(rows)
-    newrows = [(row[0], f"{row[1]//60}:{row[1]%60}", row[2]) for row in rows]
+    songs = cursor.fetchall()
+    newsongs = [(song[0], f"{song[1]//60}:{song[1]%60}", song[2]) for song in songs]
 
-    return render(request, 'songs.html',{'songs': newrows})
+    return render(request, 'songs.html',{'songs': newsongs})
 
-def show_songs_by_artist(request):
-    query='''
-        SELECT a.ArtistName, s.SongName
-        FROM artist_app_artistsong AS asg
-        JOIN artist_app_song AS s ON asg.SongID = s.SongID
-        JOIN artist_app_artist AS a ON asg.ArtistID = a.ArtistID;
-    '''
-    cursor.execute(query)
-    rows = cursor.fetchall()
-    # newrows = [(row[0], row[1], f"{row[2]//60}:{row[2]%60}") for row in rows]
-
-    return render(request, 'songs.html',{'songs': rows})
-
-
-# This shows the longest song played at each concert
 def show_longest_songs(request):
     query='''
         SELECT ConcertName
@@ -83,8 +74,6 @@ def show_longest_songs(request):
         except:
             pass
         songs.append(newsong)
-    
-        # print(concert, song)
 
     concert_songs = tuple(zip(concerts, songs))
     return render(request, 'longest_songs.html',{'concert_songs':concert_songs})
@@ -113,7 +102,6 @@ def show_most_concert(request):
     artists = [Artist.objects.get(ArtistName=artist[0]) for artist in artists]
     return render(request, "most_played_concert.html", {'concert': concert, 'artists': artists})
 
-
 def show_most_played_song(request):
     query='''
         SELECT s.SongID, s.SongName, count(SongName) as SongCount
@@ -135,8 +123,6 @@ def show_most_played_song(request):
     cursor.execute(query2)
     artist=cursor.fetchone()
     song_artist = song + artist
-    print(song_artist)
-
 
     query3=f'''
         SELECT ArtistName, COUNT(ArtistName)
@@ -150,7 +136,6 @@ def show_most_played_song(request):
     artists=cursor.fetchall()
 
     return render(request, 'most_played_song.html', {'song_artist': song_artist, 'artists':artists})
-
 
 def show_most_venues(request):
     query='''
@@ -173,7 +158,6 @@ def show_most_venues(request):
     venues = cursor.fetchall()
 
     artistsList =[]
-
     for venue in venues:
         query=f'''
             SELECT DISTINCT a.ArtistName
@@ -187,14 +171,9 @@ def show_most_venues(request):
         artists = cursor.fetchall()
         artistsList.append(artists)
 
-
-    # print(country[0])
-    # print(tuple(zip(venues,artistsList)))
     venues = zip(venues,artistsList)
 
     return render(request, 'most_venues.html', {'country':country, 'venues': venues})
-
-
 
 def show_longest_song_by_artist(request):
 
@@ -221,7 +200,6 @@ def show_longest_song_by_artist(request):
         songs.append(song)
 
     songs = [(song[0], song[1], to_mins(song[2])) for song in songs]
-    print(songs)
     return render(request, 'longest_song_by_artist.html', {'songs':songs})
 
 def show_artist_with_most_performances(request):
@@ -237,5 +215,57 @@ def show_artist_with_most_performances(request):
     cursor.execute(query)
     artist = cursor.fetchone()
 
+    query2=f'''
+        SELECT DISTINCT s.SongID, s.SongName, COUNT(s.SongID)as PlayCount
+        FROM artist_app_concertsongartist csa
+        JOIN artist_app_song s on s.SongID = csa.SongID
+        WHERE csa.ArtistID = '{artist[0]}'
+        GROUP BY s.SongID, s.SongName;
+    '''
+    cursor.execute(query2)
+    songs = cursor.fetchall()
+    song_artists = []
 
-    return render(request, 'most_performances.html', {'artist':artist})
+    for song in songs:
+        query3=f'''
+            SELECT a.ArtistName
+            FROM artist_app_artistsong aso
+            JOIN artist_app_artist a on a.ArTistID = aso.ArtistID
+            WHERE aso.SongID = '{song[0]}';
+        '''
+        cursor.execute(query3)
+        song_artist = cursor.fetchone()
+        song_artists.append(song_artist)
+
+    original_artists = list(zip(songs,song_artists))
+
+    return render(request, 'most_performances.html', {'artist':artist, 'original': original_artists})
+
+def show_most_performing_artist_by_country(request):
+    query='''
+        SELECT DISTINCT Country
+        FROM artist_app_artist;
+    '''
+    cursor.execute(query)
+    countries = cursor.fetchall()
+    artists = []
+    for country in countries:
+        query2=f'''
+            SELECT distinct a.ArtistName,a.Country, Count(a.ArtistID) as Performances
+            FROM artist_app_concertsongartist csa
+            JOIN artist_app_artist a on a.ArtistID = csa.ArtistID
+            WHERE Country = '{country[0]}'
+            GROUP BY a.ArtistName, a.Country
+            ORDER BY Performances DESC;
+        '''
+        cursor.execute(query2)
+        artist = cursor.fetchall()
+        artists.append(artist)
+
+    new_artists =[]
+    for list in artists:
+        new_artists.append(find_max(list))
+    
+    countries_artists = tuple(zip(countries,new_artists))
+    
+    return  render(request, 'most_performing_artist_by_country.html', {'countries': countries_artists})

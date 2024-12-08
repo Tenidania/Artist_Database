@@ -8,6 +8,7 @@
         {% for venue in venues %}
         <h3>
             <li>{{venue.0.0}} - {{venue.0.2}}. Capacity: {{venue.0.1}}</li>
+            <h4>Past Performers</h4>
             <ul>
                 {% for artist in venue.1 %}
                     <li>{{artist.0}}</li>

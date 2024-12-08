@@ -6,8 +6,14 @@
     <title>Songs</title>
 </head>
 <body>
-    {% for song in songs %}
-        <p> {{song.0}} by {{song.2}}. Length: {{song.1}} </p>
-    {% endfor %}
+    
 </body>
 </html>
+
+{% extends 'base.html' %}
+
+{% block content %}
+    {% for song in songs %}
+    <p> {{song.0}} by {{song.2}}. Length: {{song.1}} </p>
+    {% endfor %}
+{% endblock %}
