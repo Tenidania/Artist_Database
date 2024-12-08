@@ -2,12 +2,12 @@
 
 {% block content %}
     <h1>Most Played Song</h1>
-    <h2>{{song_artist.1}} played {{song_artist.2}} times</h2>
+    <h2>{{song_artist.1}} by {{song_artist.3}} played {{song_artist.2}} times</h2>
 
     <h2>Played by:</h2>
     <ol>
         {% for artist in artists%}
-            <li>{{artist.0}}</li>
+            <li>{{artist.0}}: {{artist.1}} times </li>
         {% endfor %}
         
     </ol>

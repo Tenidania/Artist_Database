@@ -135,6 +135,7 @@ def show_most_played_song(request):
     cursor.execute(query2)
     artist=cursor.fetchone()
     song_artist = song + artist
+    print(song_artist)
 
 
     query3=f'''
@@ -222,3 +223,19 @@ def show_longest_song_by_artist(request):
     songs = [(song[0], song[1], to_mins(song[2])) for song in songs]
     print(songs)
     return render(request, 'longest_song_by_artist.html', {'songs':songs})
+
+def show_artist_with_most_performances(request):
+
+    query='''
+        SELECT a.ArtistID, a.ArtistName, COUNT(csa.SongID) as SongsPlayed
+        FROM artist_app_concertsongartist csa
+        JOIN artist_app_artist a on a.ArtistID = csa.ArtistID
+        Group By a.ArtistID, a.ArtistName
+        ORDER BY SongsPlayed DESC
+        LIMIT 1;
+    '''
+    cursor.execute(query)
+    artist = cursor.fetchone()
+
+
+    return render(request, 'most_performances.html', {'artist':artist})
